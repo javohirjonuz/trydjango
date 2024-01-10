@@ -14,6 +14,7 @@ class TagAdmin(admin.ModelAdmin):
 
 class IngredientAdminTabularInline(admin.TabularInline):
     model = Ingredient
+    extra = 0
 
 
 @admin.register(Recipe)
@@ -26,11 +27,11 @@ class RecipeAdmin(admin.ModelAdmin):
     date_hierarchy = 'created_date'
     filter_horizontal = ('tags',)
     readonly_fields = ('slug', 'created_date',)
-#
-#
+
+
 @admin.register(Ingredient)
 class IngredientAdmin(admin.ModelAdmin):
-    list_display = ('id', 'recipe', 'title', 'quantity', 'unit', 'is_active')
+    list_display = ('id', 'title', 'quantity', 'unit', 'is_active')
     search_fields = ('recipe__title', 'title')
     list_filter = ('is_active', 'unit')
     autocomplete_fields = ('recipe',)

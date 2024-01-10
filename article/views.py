@@ -2,6 +2,7 @@ from django.shortcuts import (render, redirect, reverse,get_object_or_404)
 from django.http import HttpResponse
 from django.contrib import messages
 from django.db.models import Q
+from django.core.paginator import Paginator
 from .models import Article
 from .forms import ArticleForm
 
@@ -18,11 +19,14 @@ def article_list(request):
     # article = Article.objects.all()
     query = request.GET.get('q')
     articles = Article.objects.search(query=query)
+    paginator = Paginator(articles, 3)
+    page_number = request.GET.get("page")
+    page_qs = paginator.get_page(page_number)
 
     # if query:
     #     articles = Article.objects.filter(Q(title__icontains=query) | Q(content__icontains=query))
     context = {
-        'object_list': articles,
+        'object_list': page_qs,
         }
     return render(request, 'article/index.html', context)
 

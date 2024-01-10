@@ -31,10 +31,10 @@ class Ingredient(models.Model):
         (2, "Litre  "),
         (3, "Piece"),
     )
-    recipe = models.ForeignKey(Recipe, on_delete=models.CASCADE)
+    recipe = models.ForeignKey(Recipe, on_delete=models.CASCADE, related_name="ingredients")  #<modelname>_set
     title = models.CharField(max_length=221)
     quantity = models.DecimalField(max_digits=10, decimal_places=2)
-    unit = models.IntegerField(choices=UNIT, default=1)  #
+    unit = models.IntegerField(choices=UNIT, default=1)    # get_<field_name>_display
     is_active = models.BooleanField(default=True)
 
     def str(self):

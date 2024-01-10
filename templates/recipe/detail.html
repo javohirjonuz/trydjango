@@ -49,8 +49,8 @@
                         <h5 class="card-title">{{ ingredient.title }}</h5>
                         <p class="card-text">{{ ingredient.quantity }} - {{ ingredient.get_unit_display }}</p>
                         {% if is_author %}
-                            <a href="{% url 'recipe:ingredient-edit' recipe.slug ingredients.pk %}" class="btn btn-secondary">Editing Ingredient</a>
-                            <a href="#" class="btn btn-danger">Deleting Ingredient</a>
+                            <a href="{% url 'recipe:ingredient-edit' object.slug ingredients.id %}" class="btn btn-secondary">Editing Ingredient</a>
+                            <a href="{% url 'recipe:ingredient-delete ' object.slug ingredients.id %}" class="btn btn-danger">Deleting Ingredient</a>
                         {% endif %}
                     </div>
                 </div>

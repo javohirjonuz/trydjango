@@ -3,20 +3,29 @@ from django.shortcuts import render, get_object_or_404, redirect
 from django.urls import reverse
 from django.contrib import messages
 from django.db.models import Q
-
+from django.core.exceptions import ObjectDoesNotExist
+from django.core.paginator import Paginator
 from .models import Recipe, Tag, Ingredient
-from .forms import RecipeForm, IngredientForm
+from .forms import RecipeForm, IngredientForm, IngredientEditForm
 
 
 def recipe_list(request):
-    recipes = Recipe.objects.order_by('-id')
     tag = request.GET.get('tag')
+    q = request.GET.get('q')
+    q_condition = Q()
+    if q:
+        q_condition = Q(title__icontains=q)
+    tag_condition = Q()
+
     if tag:
-        recipes = Recipe.objects.order_by('-id').filter(tags__title=tag)
+        tag_condition = Q(tags__title=tag)
+    recipes = Recipe.objects.filter(q_condition, tag_condition).order_by('-id')
 
+    paginator = Paginator(recipes, 1)
+    page_number = request.GET.get('page')
+    page_qs = paginator.get_page(page_number)
     context = {
-        'object_list': recipes
-
+        'object_list': page_qs,
     }
     return render(request, 'recipe/index.html', context)
 
@@ -35,9 +44,9 @@ def my_recipe_list(request):
 
 def recipe_detail(request, slug):
     recipe = get_object_or_404(Recipe, slug=slug)
-    is_author_lookup = Q(is_active=False)
+    is_author_lookup = Q(is_active=True)
     if request.user == recipe.author:
-        is_author_lookup = Q(is_active=True)
+        is_author_lookup = Q()
 
     ingredients = Ingredient.objects.filter(Q(recipe_id=recipe.id) & is_author_lookup)
     is_author = request.user == recipe.author
@@ -121,7 +130,8 @@ def recipe_ingredient_create(request, slug):
             return redirect(reverse_url)
 
     ctx = {
-        'form': form
+        'form': form,
+        'recipe': recipe
     }
     return render(request, 'recipe/ingredient_create.html', ctx)
 
@@ -129,16 +139,43 @@ def recipe_ingredient_create(request, slug):
 def recipe_ingredient_edit(request, slug, pk, *args, **kwargs):
     recipe = get_object_or_404(Recipe, slug=slug)
     instance = get_object_or_404(Ingredient, id=pk)
-    form = IngredientForm(instance=instance)
+    if instance not in recipe.ingredients.all():
+        raise ObjectDoesNotExist(f"{instance.title} does not exist in{recipe.title} recipe")
+    if recipe.author != request.user:
+        messages.error(request, 'You have no enough permission')
+        return redirect('auth:login')
+    form = IngredientEditForm(instance=instance)
     if request.method == 'POST':
-        form = IngredientForm(data=request.POST, instance=instance)
+        form = IngredientEditForm(data=request.POST, instance=instance)
         if form.is_valid():
-            form.save()
+            obj = form.save()
+            messages.success(request, f'You changed an  ingredient "{obj.title}".')
             reverse_url = reverse('recipe:detail ', args=[slug])
             return redirect(reverse_url)
-        ctx = {
-            'form':form,
-            'recipe': recipe,
-            'title': "Change ingredient belong to",
-        }
-        return render(request, 'recipe/ingredient_create.html', ctx)
+    ctx = {
+        'form': form,
+        'recipe': recipe,
+        'title': "Change ingredient belong to",
+    }
+    return render(request, 'recipe/ingredient_create.html', ctx)
+
+
+def recipe_ingredient_delete(request, *args, **kwargs):
+    recipe = get_object_or_404(Recipe, slug=kwargs['slug'])
+    reverse_url = reverse('recipe:detail ', args=[kwargs['slug']])
+    instance = get_object_or_404(Ingredient, id=kwargs['pk'])
+    if instance not in recipe.ingredients.all():
+        raise ObjectDoesNotExist(f"{instance.title} does not exits in {recipe.title} recipe")
+    if recipe.author != request.user:
+        messages.error(request, f'"{instance.title}"is deleted')
+        return redirect(reverse_url)
+    if request.method == "POST":
+        instance.delete()
+        return redirect(reverse_url)
+
+    ctx = {
+        "recipe": recipe,
+        "object": instance,
+
+    }
+    return render(request, 'recipe/ingredient_delete.html', ctx)

@@ -1,26 +1,26 @@
 {% extends 'base.html' %}
 
-{% block title %} Recipe Create{% endblock %}
+{% block title %}Recipe Create{% endblock %}
 
 {% block header %}
     {% if header %}
-{#        <h1>Create New Article</h1>#}
         <h1>{{ header }}</h1>
+    {% else %}
+        <h1>Create New Recipe</h1>
     {% endif %}
 {% endblock %}
 
 {% block content %}
     {% block primary_links %}
         <div>
-           <span>
-               <a href="{% url 'recipe:list ' %}">Recipes</a>
-           </span>/ <span>Create</span>
-
+            <span>
+                <a href="{% url 'recipe:list' %}">Recipes</a>
+            </span>/ <span>Create</span>
         </div>
     {% endblock %}
 
     <div class="row justify-content-center mt-2">
-        <div class="col-md-6 ">
+        <div class="col-md-6">
             <form method="post" enctype="multipart/form-data">
                 {% csrf_token %}
                 <div class="mb-3 row">
@@ -47,13 +47,12 @@
                         {{ form.tags }}
                     </div>
                 </div>
-                <div class="buttons d-flex justify-content-end gap-2 ">
+                <div class="buttons d-flex justify-content-end gap-2">
                     <button type="submit" class="btn btn-primary">Save</button>
-                    <button type="reset" class="btn btn-warning">Reset Fields</button>
+                    <button type="reset" class="btn btn-warning">Rest Fields</button>
                 </div>
             </form>
         </div>
-
     </div>
 
 {% endblock %}

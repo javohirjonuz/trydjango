@@ -40,12 +40,39 @@ class RecipeForm(forms.ModelForm):
         return title.capitalize()
 
 
-class IngredientForm():
-    class Meta:
-        model = Ingredient
-        fields = ['recipe', 'title', 'quantity', ' unit', 'is_active']
-        exclude = ['recipe']
+# class IngredientForm():
+#     class Meta:
+#         model = Ingredient
+#         fields = ['recipe', 'title', 'quantity', ' unit', 'is_active']
+#         exclude = ['recipe']
+#
+#     def __int__(self, *args, **kwargs):
+#         super().__init__(*args, **kwargs)
+#         self.fields['title'].widget.attrs.update({
+#             "class": "form-control",
+#             "id": "ingredient_title",
+#             "placeholder": "Title   "
+#         })
+#         self.fields['quantity'].widget.attrs.update({
+#             "class": "form-control",
+#             "id": "ingredient_quantity",
+#             "placeholder": "Quantity"
+#         })
+#         self.fields['unit'].widget.attrs.update({
+#             "class": "form-control",
+#             "id": "ingredient_unit",
+#
+#         })
+#         self.fields['is_active'].widget.attrs.update({
+#             "class": "form-control",
+#             "id": "ingredient_is_active",
+#             "role": "switch",
+#             "type": "сheckbox",
+#             "checked": "checked"
+#         })
+#
 
+class IngredientEditForm(forms.ModelForm):
     def __int__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields['title'].widget.attrs.update({
@@ -53,7 +80,7 @@ class IngredientForm():
             "id": "ingredient_title",
             "placeholder": "Title   "
         })
-        self.fields['quantity'].widget.attrs.update({
+        self.fieds['quantity'].widget.attrs.update({
             "class": "form-control",
             "id": "ingredient_quantity",
             "placeholder": "Quantity"
@@ -68,5 +95,13 @@ class IngredientForm():
             "id": "ingredient_is_active",
             "role": "switch",
             "type": "сheckbox",
-            "checked": "checked"
+        })
+
+
+class IngredientForm(IngredientEditForm):
+    def __int__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['is_active'].widget.attrs.update({
+
+            "checkbox": "checkbox",
         })
